@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { MonthlyComparisonChart } from "@/components/insights/MonthlyComparisonChart";
+import { InsightsOverview } from "@/components/insights/InsightsOverview"; // Import new component
 import { useFinanceStore } from "@/store/useFinanceStore";
 import {
     fetchSummary,
@@ -43,6 +44,11 @@ export default function InsightsPage() {
     if (isLoading) {
         return (
             <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                </div>
                 <Skeleton className="h-[500px] w-full rounded-xl" />
             </div>
         );
@@ -52,8 +58,11 @@ export default function InsightsPage() {
         <div className="space-y-8">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight mb-1">Insights</h2>
-                <p className="text-muted-foreground">Deep dive into your spending habits and financial health.</p>
+                <p className="text-muted-foreground">Strategic analysis of your financial performance.</p>
             </div>
+
+            {/* New Summary Insights Section */}
+            <InsightsOverview />
 
             <MonthlyComparisonChart />
         </div>

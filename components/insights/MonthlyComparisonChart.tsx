@@ -23,12 +23,8 @@ export function MonthlyComparisonChart() {
                 <div className="bg-popover border border-border p-3 rounded-xl shadow-2xl text-xs">
                     <p className="font-bold mb-2">{label}</p>
                     <div className="space-y-1">
-                        <p className="text-emerald-500 font-medium">
-                            Income: ${(payload[0].value as number).toLocaleString()}
-                        </p>
-                        <p className="text-rose-500 font-medium">
-                            Expenses: ${(payload[1].value as number).toLocaleString()}
-                        </p>
+                        <p className="text-[#471396] font-bold">Income: ${(payload[0].value as number).toLocaleString()}</p>
+                        <p className="text-[#B13BFF] font-bold">Expenses: ${(payload[1].value as number).toLocaleString()}</p>
                     </div>
                 </div>
             );
