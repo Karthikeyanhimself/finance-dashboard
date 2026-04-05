@@ -10,8 +10,8 @@ import { Shield, User } from "lucide-react";
 
 export function Header() {
     const pathname = usePathname();
-    // We'll use 'any' here just for the setter to bypass the strict enum mismatch
-    const { role, setRole } = useRoleStore() as any;
+    const role = useRoleStore((s) => s.role);
+    const setRole = useRoleStore((s) => s.setRole);
     const [mounted, setMounted] = useState(false);
 
     const pageTitle = pathname.split("/").pop() || "Dashboard";
@@ -21,16 +21,12 @@ export function Header() {
     }, []);
 
     const toggleRole = () => {
-        // This logic handles the toggle regardless of whether your store 
-        // uses "user", "member", or "viewer" as the alternative.
-        const isAdmin = String(role).toLowerCase() === "admin";
-        setRole(isAdmin ? "user" : "admin");
+        setRole(role === "admin" ? "viewer" : "admin");
     };
 
     return (
         <header className="fixed top-0 left-0 right-0 z-40 border-b border-white/5 bg-background/20 backdrop-blur-md">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-
                 <div className="flex items-center gap-4">
                     <span className="text-sm font-bold tracking-widest uppercase opacity-50 hidden md:block">
                         Finance Tracker
@@ -48,13 +44,12 @@ export function Header() {
 
                 <div className="flex items-center gap-6">
                     {mounted && (
-                        <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                        <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 transition-colors hover:bg-white/10">
                             <div className="flex items-center gap-2">
-                                {/* Case-insensitive check to ensure the icon matches */}
-                                {String(role).toLowerCase() === "admin" ? (
-                                    <Shield size={14} className="text-emerald-400" />
+                                {role === "admin" ? (
+                                    <Shield size={14} className="text-emerald-500 dark:text-emerald-400" />
                                 ) : (
-                                    <User size={14} className="text-sky-400" />
+                                    <User size={14} className="text-sky-500 dark:text-sky-400" />
                                 )}
                                 <Label
                                     htmlFor="role-mode"
@@ -65,9 +60,9 @@ export function Header() {
                             </div>
                             <Switch
                                 id="role-mode"
-                                checked={String(role).toLowerCase() === "admin"}
+                                checked={role === "admin"}
                                 onCheckedChange={toggleRole}
-                                className="scale-75 data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-sky-400"
+                                className="scale-75 data-[state=checked]:bg-emerald-500 dark:data-[state=checked]:bg-emerald-400 data-[state=unchecked]:bg-sky-500 dark:data-[state=unchecked]:bg-sky-400 border-transparent transition-colors"
                             />
                         </div>
                     )}

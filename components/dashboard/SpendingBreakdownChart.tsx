@@ -1,121 +1,108 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     PieChart,
     Pie,
     Cell,
-    Tooltip,
     ResponsiveContainer,
+    Tooltip,
     Sector,
+    Legend
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceStore } from "@/store/useFinanceStore";
-import { formatCurrency, cn } from "@/lib/utils";
+import type { TooltipProps } from "recharts";
+import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+import type { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-const CATEGORY_COLORS: Record<string, string> = {
-    Food: "#f97316", Transport: "#3b82f6", Utilities: "#06b6d4",
-    Shopping: "#ec4899", Entertainment: "#a855f7", Other: "#64748b",
-};
-
-const renderActiveShape = (props: any) => {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
-    return (
-        <g>
-            <Sector
-                cx={cx} cy={cy}
-                innerRadius={innerRadius}
-                outerRadius={outerRadius + 8}
-                startAngle={startAngle}
-                endAngle={endAngle}
-                fill={fill}
-            />
-        </g>
-    );
-};
+const COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f43f5e", "#f59e0b", "#06b6d4", "#ec4899"];
 
 export function SpendingBreakdownChart() {
-    const { categoryBreakdown, isLoading } = useFinanceStore();
-    const [activeIndex, setActiveIndex] = useState(0);
+    const data = useFinanceStore((s) => s.categoryBreakdown);
+    const [activeIndex, setActiveIndex] = React.useState(0);
 
-    const activeCategory = useMemo(() => {
-        if (!categoryBreakdown || categoryBreakdown.length === 0) return null;
-        return categoryBreakdown[activeIndex];
-    }, [categoryBreakdown, activeIndex]);
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    // Map store data to Recharts format: { name: category, value: amount }
+    const chartData = React.useMemo(() => {
+        return data.map(item => ({
+            name: item.category,
+            value: item.amount
+        }));
+    }, [data]);
 
+    const onPieEnter = (_: any, index: number) => {
+        setActiveIndex(index);
+    };
 
-    if (!isMounted || isLoading || !categoryBreakdown) {
-        return <Skeleton className="h-[400px] w-full rounded-xl" />;
-    }
+    const renderActiveShape = (props: PieSectorDataItem) => {
+        const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props;
+
+        return (
+            <g>
+                <text x={cx} y={cy} dy={-10} textAnchor="middle" fill="hsl(var(--foreground))" className="text-sm font-medium capitalize">
+                    {payload.name}
+                </text>
+                <text x={cx} y={cy} dy={15} textAnchor="middle" fill="hsl(var(--muted-foreground))" className="text-xs">
+                    ${value?.toLocaleString()}
+                </text>
+                <Sector
+                    cx={cx}
+                    cy={cy}
+                    innerRadius={innerRadius}
+                    outerRadius={(outerRadius || 0) + 8}
+                    startAngle={startAngle}
+                    endAngle={endAngle}
+                    fill={fill}
+                />
+            </g>
+        );
+    };
+
+    const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-popover border border-border p-2 rounded-lg shadow-xl text-xs">
+                    <p className="font-bold capitalize">{payload[0].name}</p>
+                    <p className="text-primary">${(payload[0].value as number).toLocaleString()}</p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
-        <Card className="flex flex-col w-full overflow-hidden">
+        <Card className="bg-card/50 backdrop-blur-sm border-white/5">
             <CardHeader>
-                <CardTitle>Spending Breakdown</CardTitle>
+                <CardTitle className="text-sm font-medium">Spending Breakdown</CardTitle>
             </CardHeader>
-            <CardContent className="w-full flex flex-col items-center justify-center relative pb-6">
-                <div className="relative w-full h-[260px] flex items-center justify-center">
-                    {activeCategory && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-                            <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
-                                {activeCategory.category}
-                            </span>
-                            <span className="text-xl font-bold text-foreground">
-                                {formatCurrency(activeCategory.amount)}
-                            </span>
-                        </div>
-                    )}
-
+            <CardContent>
+                <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie
-                                data={categoryBreakdown}
+                            <Pie<any>
+                                activeIndex={activeIndex}
+                                activeShape={renderActiveShape}
+                                data={chartData}
                                 cx="50%"
-                                cy="50%"
-                                innerRadius={75}
-                                outerRadius={105}
-                                paddingAngle={3}
-                                dataKey="amount"
-                                cursor="pointer"
-                                onClick={(_, index) => setActiveIndex(index)}
-                                {...({ activeIndex, activeShape: renderActiveShape } as any)}
+                                cy="45%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                dataKey="value"
+                                onMouseEnter={onPieEnter}
+                                paddingAngle={5}
                             >
-                                {categoryBreakdown.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={CATEGORY_COLORS[entry.category] || CATEGORY_COLORS.Other}
-                                        className="outline-none hover:opacity-80 transition-opacity duration-200"
-                                    />
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip
-                                formatter={(value: any) => formatCurrency(Number(value) || 0)}
-                                contentStyle={{ borderRadius: '8px', backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))', zIndex: 50 }}
-                                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend
+                                verticalAlign="bottom"
+                                height={36}
+                                formatter={(value) => <span className="text-xs capitalize text-muted-foreground">{value}</span>}
                             />
                         </PieChart>
                     </ResponsiveContainer>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-3 mt-4 w-full px-2">
-                    {categoryBreakdown.map((entry, index) => (
-                        <div
-                            key={entry.category}
-                            className={cn(
-                                "flex items-center gap-1.5 text-[11px] sm:text-xs cursor-pointer px-2 py-1 rounded-md transition-colors",
-                                activeIndex === index ? "bg-muted font-medium" : "text-muted-foreground hover:bg-muted/50"
-                            )}
-                            onClick={() => setActiveIndex(index)}
-                        >
-                            <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: CATEGORY_COLORS[entry.category] || CATEGORY_COLORS.Other }} />
-                            <span className="truncate">{entry.category} ({entry.percentage}%)</span>
-                        </div>
-                    ))}
                 </div>
             </CardContent>
         </Card>

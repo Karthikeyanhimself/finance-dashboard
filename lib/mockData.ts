@@ -1,90 +1,92 @@
-export type TransactionType = "income" | "expense";
+import { Transaction } from "@/store/useFinanceStore";
 
-export interface Transaction {
-    id: string;
-    date: string;
-    description: string;
-    category: string;
-    amount: number;
-    type: TransactionType;
+export interface FinanceSummary {
+    totalBalance: number;
+    totalIncome: number;
+    totalExpenses: number;
+    changeFromLastMonth: number;
 }
 
-// 40 transactions: 10 incomes, 30 expenses with realistic amounts
+export interface MonthlyData {
+    month: string;
+    income: number;
+    expenses: number;
+    balance: number;
+}
+
+export interface CategoryBreakdown {
+    category: string;
+    amount: number;
+    percentage: number;
+}
+
 export const mockTransactions: Transaction[] = [
-    // March (Current Month)
-    { id: "t1", date: "2026-03-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t2", date: "2026-03-26T14:30:00Z", description: "Whole Foods Market", category: "Food", amount: 145.80, type: "expense" },
-    { id: "t3", date: "2026-03-24T09:15:00Z", description: "Electric Bill", category: "Utilities", amount: 94.20, type: "expense" },
-    { id: "t4", date: "2026-03-21T19:00:00Z", description: "Uber Ride", category: "Transport", amount: 24.50, type: "expense" },
-    { id: "t5", date: "2026-03-18T12:00:00Z", description: "Client Web Project", category: "Freelance", amount: 1250.00, type: "income" },
-    { id: "t6", date: "2026-03-15T20:00:00Z", description: "Netflix Subscription", category: "Entertainment", amount: 15.99, type: "expense" },
-    { id: "t7", date: "2026-03-12T16:45:00Z", description: "H&M Clothing", category: "Shopping", amount: 89.90, type: "expense" },
-    { id: "t8", date: "2026-03-08T11:20:00Z", description: "Gas Station", category: "Transport", amount: 45.00, type: "expense" },
-    { id: "t9", date: "2026-03-05T13:10:00Z", description: "Local Cafe", category: "Food", amount: 12.50, type: "expense" },
-
-    // February
-    { id: "t10", date: "2026-02-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t11", date: "2026-02-25T15:00:00Z", description: "Water Bill", category: "Utilities", amount: 35.60, type: "expense" },
-    { id: "t12", date: "2026-02-22T19:30:00Z", description: "Movie Theater", category: "Entertainment", amount: 32.00, type: "expense" },
-    { id: "t13", date: "2026-02-19T08:45:00Z", description: "Trader Joe's", category: "Food", amount: 112.30, type: "expense" },
-    { id: "t14", date: "2026-02-15T18:00:00Z", description: "Subway Ticket", category: "Transport", amount: 2.75, type: "expense" },
-    { id: "t15", date: "2026-02-12T14:20:00Z", description: "Sneakers", category: "Shopping", amount: 120.00, type: "expense" },
-    { id: "t16", date: "2026-02-08T09:00:00Z", description: "Internet Provider", category: "Utilities", amount: 79.99, type: "expense" },
-
-    // January
-    { id: "t17", date: "2026-01-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t18", date: "2026-01-24T12:30:00Z", description: "Logo Design Gig", category: "Freelance", amount: 450.00, type: "income" },
-    { id: "t19", date: "2026-01-20T17:15:00Z", description: "Restaurant Dinner", category: "Food", amount: 85.40, type: "expense" },
-    { id: "t20", date: "2026-01-16T10:00:00Z", description: "Pharmacy", category: "Shopping", amount: 34.50, type: "expense" },
-    { id: "t21", date: "2026-01-12T19:00:00Z", description: "Concert Tickets", category: "Entertainment", amount: 150.00, type: "expense" },
-    { id: "t22", date: "2026-01-08T14:40:00Z", description: "Uber Ride", category: "Transport", amount: 18.20, type: "expense" },
-    { id: "t23", date: "2026-01-04T09:10:00Z", description: "Electric Bill", category: "Utilities", amount: 105.30, type: "expense" },
-
-    // December
-    { id: "t24", date: "2025-12-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t25", date: "2025-12-23T16:00:00Z", description: "Holiday Gifts", category: "Shopping", amount: 350.00, type: "expense" },
-    { id: "t26", date: "2025-12-19T11:20:00Z", description: "Supermarket", category: "Food", amount: 180.50, type: "expense" },
-    { id: "t27", date: "2025-12-15T18:30:00Z", description: "Train Ticket", category: "Transport", amount: 55.00, type: "expense" },
-    { id: "t28", date: "2025-12-10T20:00:00Z", description: "Streaming Services", category: "Entertainment", amount: 28.98, type: "expense" },
-    { id: "t29", date: "2025-12-05T09:00:00Z", description: "Winter Bonus", category: "Salary", amount: 1500.00, type: "income" },
-
-    // November
-    { id: "t30", date: "2025-11-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t31", date: "2025-11-22T13:45:00Z", description: "Consulting", category: "Freelance", amount: 800.00, type: "income" },
-    { id: "t32", date: "2025-11-18T10:30:00Z", description: "Coffee Shop", category: "Food", amount: 18.75, type: "expense" },
-    { id: "t33", date: "2025-11-14T19:20:00Z", description: "Gas Station", category: "Transport", amount: 42.00, type: "expense" },
-    { id: "t34", date: "2025-11-09T14:10:00Z", description: "Jacket", category: "Shopping", amount: 135.00, type: "expense" },
-    { id: "t35", date: "2025-11-03T08:50:00Z", description: "Water Bill", category: "Utilities", amount: 38.20, type: "expense" },
-
-    // October
-    { id: "t36", date: "2025-10-28T10:00:00Z", description: "Monthly Salary", category: "Salary", amount: 4250.00, type: "income" },
-    { id: "t37", date: "2025-10-21T12:00:00Z", description: "Blog Article", category: "Freelance", amount: 300.00, type: "income" },
-    { id: "t38", date: "2025-10-15T18:00:00Z", description: "Grocery Store", category: "Food", amount: 165.20, type: "expense" },
-    { id: "t39", date: "2025-10-10T16:30:00Z", description: "Video Game", category: "Entertainment", amount: 59.99, type: "expense" },
-    { id: "t40", date: "2025-10-05T09:15:00Z", description: "Internet Provider", category: "Utilities", amount: 79.99, type: "expense" },
+    { id: "1", date: "2026-03-31", description: "Monthly Salary", category: "Salary", amount: 5000, type: "income" },
+    { id: "2", date: "2026-03-30", description: "Whole Foods Market", category: "Food", amount: 145.20, type: "expense" },
+    { id: "3", date: "2026-03-29", description: "Apple Subscription", category: "Entertainment", amount: 14.99, type: "expense" },
+    { id: "4", date: "2026-03-28", description: "Gas Station", category: "Transport", amount: 55.00, type: "expense" },
+    { id: "5", date: "2026-03-27", description: "Freelance UI Design", category: "Salary", amount: 1200, type: "income" },
+    { id: "6", date: "2026-03-26", description: "Starbucks Coffee", category: "Food", amount: 6.50, type: "expense" },
+    { id: "7", date: "2026-03-25", description: "Rent Payment", category: "Housing", amount: 1500, type: "expense" },
+    { id: "8", date: "2026-03-24", description: "Amazon - Electronics", category: "Shopping", amount: 299.99, type: "expense" },
+    { id: "9", date: "2026-03-23", description: "Electric Bill", category: "Utilities", amount: 112.40, type: "expense" },
+    { id: "10", date: "2026-03-22", description: "Uber Ride", category: "Transport", amount: 24.50, type: "expense" },
+    { id: "11", date: "2026-03-21", description: "Dividend Payout", category: "Salary", amount: 150.75, type: "income" },
+    { id: "12", date: "2026-03-20", description: "Steam Games", category: "Entertainment", amount: 59.99, type: "expense" },
+    { id: "13", date: "2026-03-19", description: "Gym Membership", category: "Entertainment", amount: 45.00, type: "expense" },
+    { id: "14", date: "2026-03-18", description: "Local Bistro Dinner", category: "Food", amount: 88.00, type: "expense" },
+    { id: "15", date: "2026-03-17", description: "Internet Service", category: "Utilities", amount: 79.99, type: "expense" },
+    { id: "16", date: "2026-03-16", description: "H&M Clothing", category: "Shopping", amount: 124.00, type: "expense" },
+    { id: "17", date: "2026-03-15", description: "Stock Sale", category: "Salary", amount: 2400, type: "income" },
+    { id: "18", date: "2026-03-14", description: "Water Bill", category: "Utilities", amount: 42.10, type: "expense" },
+    { id: "19", date: "2026-03-13", description: "Cinemark Theater", category: "Entertainment", amount: 32.50, type: "expense" },
+    { id: "20", date: "2026-03-12", description: "Trader Joe's", category: "Food", amount: 92.30, type: "expense" },
+    { id: "21", date: "2026-03-11", description: "Car Insurance", category: "Transport", amount: 180.00, type: "expense" },
+    { id: "22", date: "2026-03-10", description: "Bonus Commission", category: "Salary", amount: 800, type: "income" },
+    { id: "23", date: "2026-03-09", description: "Spotify", category: "Entertainment", amount: 10.99, type: "expense" },
+    { id: "24", date: "2026-03-08", description: "Pharmacy", category: "Shopping", amount: 22.40, type: "expense" },
+    { id: "25", date: "2026-03-07", description: "Subway Pass", category: "Transport", amount: 90.00, type: "expense" },
+    { id: "26", date: "2026-03-06", description: "Pizza Night", category: "Food", amount: 34.00, type: "expense" },
+    { id: "27", date: "2026-03-05", description: "Phone Bill", category: "Utilities", amount: 65.00, type: "expense" },
+    { id: "28", date: "2026-03-04", description: "Consulting Fee", category: "Salary", amount: 500, type: "income" },
+    { id: "29", date: "2026-03-03", description: "Apple Store - Airpods", category: "Shopping", amount: 199.00, type: "expense" },
+    { id: "30", date: "2026-03-02", description: "Parking Fee", category: "Transport", amount: 15.00, type: "expense" },
+    { id: "31", date: "2026-02-28", description: "Old Salary", category: "Salary", amount: 5000, type: "income" },
+    { id: "32", date: "2026-02-25", description: "Old Rent", category: "Housing", amount: 1500, type: "expense" },
+    { id: "33", date: "2026-02-20", description: "Nike Shoes", category: "Shopping", amount: 110.00, type: "expense" },
+    { id: "34", date: "2026-02-15", description: "Side Gig - Writing", category: "Salary", amount: 300, type: "income" },
+    { id: "35", date: "2026-02-10", description: "Home Depot", category: "Housing", amount: 245.00, type: "expense" },
+    { id: "36", date: "2026-02-05", description: "Adobe Creative Cloud", category: "Entertainment", amount: 52.99, type: "expense" },
+    { id: "37", date: "2026-02-03", description: "Uber Eats", category: "Food", amount: 45.60, type: "expense" },
+    { id: "38", date: "2026-01-25", description: "New Year Bonus", category: "Salary", amount: 1000, type: "income" },
+    { id: "39", date: "2026-01-20", description: "Vet Visit", category: "Shopping", amount: 150.00, type: "expense" },
+    { id: "40", date: "2026-01-15", description: "Furniture - IKEA", category: "Housing", amount: 480.00, type: "expense" },
 ];
 
-export const mockSummary = {
-    totalBalance: 24850.75,
-    totalIncome: 30500.00,
-    totalExpenses: 5649.25,
-    changeFromLastMonth: 4.2, // Positive percentage
+export const mockSummary: FinanceSummary = {
+    totalBalance: 24850.45,
+    totalIncome: 10050.75,
+    totalExpenses: 4215.30,
+    changeFromLastMonth: 8.4,
 };
 
-export const mockMonthlyData = [
-    { month: "Oct 2025", income: 4550, expenses: 840, balance: 3710 },
-    { month: "Nov 2025", income: 5050, expenses: 950, balance: 4100 },
-    { month: "Dec 2025", income: 5750, expenses: 1450, balance: 4300 },
-    { month: "Jan 2026", income: 4700, expenses: 1100, balance: 3600 },
-    { month: "Feb 2026", income: 4250, expenses: 850, balance: 3400 },
-    { month: "Mar 2026", income: 5500, expenses: 720, balance: 4780 },
+export const mockMonthlyData: MonthlyData[] = [
+    { month: "Oct 2025", income: 4500, expenses: 3200, balance: 18500 },
+    { month: "Nov 2025", income: 4800, expenses: 3100, balance: 20200 },
+    { month: "Dec 2025", income: 5200, expenses: 4500, balance: 20900 },
+    { month: "Jan 2026", income: 6000, expenses: 3400, balance: 23500 },
+    { month: "Feb 2026", income: 5300, expenses: 3950, balance: 24850 },
+    { month: "Mar 2026", income: 10050, expenses: 4215, balance: 30685 },
 ];
 
-export const mockCategoryBreakdown = [
-    { category: "Food", amount: 1550, percentage: 28 },
-    { category: "Transport", amount: 840, percentage: 15 },
-    { category: "Utilities", amount: 720, percentage: 13 },
-    { category: "Shopping", amount: 1100, percentage: 20 },
-    { category: "Entertainment", amount: 650, percentage: 12 },
-    { category: "Other", amount: 789.25, percentage: 12 },
+export const mockCategoryBreakdown: CategoryBreakdown[] = [
+    { category: "Housing", amount: 1500, percentage: 35.6 },
+    { category: "Food", amount: 512.6, percentage: 12.2 },
+    { category: "Transport", amount: 419.5, percentage: 9.9 },
+    { category: "Shopping", amount: 769.39, percentage: 18.2 },
+    { category: "Utilities", amount: 299.89, percentage: 7.1 },
+    { category: "Entertainment", amount: 213.92, percentage: 5.1 },
+    { category: "Others", amount: 500, percentage: 11.9 },
 ];
+
+// FIXED: Missing Interfaces in mockData.ts

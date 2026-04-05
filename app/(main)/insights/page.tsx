@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useFinanceStore } from "@/store/useFinanceStore";
-import { fetchSummary, fetchMonthlyData, fetchCategoryBreakdown } from "@/lib/mockGraphql";
-import { InsightCards } from "@/components/insights/InsightCards";
 import { MonthlyComparisonChart } from "@/components/insights/MonthlyComparisonChart";
+import { useFinanceStore } from "@/store/useFinanceStore";
+import {
+    fetchSummary,
+    fetchMonthlyData,
+    fetchCategoryBreakdown
+} from "@/lib/mockGraphql";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InsightsPage() {
-    const {
-        setLoading,
-        setSummary,
-        setMonthlyData,
-        setCategoryBreakdown,
-        summary
-    } = useFinanceStore();
+    const setLoading = useFinanceStore((s) => s.setLoading);
+    const setSummary = useFinanceStore((s) => s.setSummary);
+    const setMonthlyData = useFinanceStore((s) => s.setMonthlyData);
+    const setCategoryBreakdown = useFinanceStore((s) => s.setCategoryBreakdown);
+    const isLoading = useFinanceStore((s) => s.isLoading);
 
     useEffect(() => {
-        if (summary) return; // Skip fetch if already loaded via dashboard
-
         async function loadInsightsData() {
             setLoading(true);
             try {
@@ -26,6 +26,7 @@ export default function InsightsPage() {
                     fetchMonthlyData(),
                     fetchCategoryBreakdown()
                 ]);
+
                 setSummary(summaryRes.data.summary);
                 setMonthlyData(monthlyRes.data.monthlyData);
                 setCategoryBreakdown(categoryRes.data.categoryBreakdown);
@@ -37,22 +38,24 @@ export default function InsightsPage() {
         }
 
         loadInsightsData();
-    }, [setLoading, setSummary, setMonthlyData, setCategoryBreakdown, summary]);
+    }, [setLoading, setSummary, setMonthlyData, setCategoryBreakdown]);
+
+    if (isLoading) {
+        return (
+            <div className="space-y-8">
+                <Skeleton className="h-[500px] w-full rounded-xl" />
+            </div>
+        );
+    }
 
     return (
-        <div className="w-full">
-            <div className="mb-8 pt-2">
-                <h2 className="text-3xl font-bold tracking-tight mb-2">Insights</h2>
-                <p className="text-muted-foreground">
-                    Here&apos;s a breakdown of your financial activity over the last 6 months.
-                </p>
+        <div className="space-y-8">
+            <div>
+                <h2 className="text-3xl font-bold tracking-tight mb-1">Insights</h2>
+                <p className="text-muted-foreground">Deep dive into your spending habits and financial health.</p>
             </div>
 
-            <InsightCards />
-
-            <div className="mt-8">
-                <MonthlyComparisonChart />
-            </div>
+            <MonthlyComparisonChart />
         </div>
     );
 }

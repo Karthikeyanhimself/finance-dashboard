@@ -1,100 +1,108 @@
 import { create } from "zustand";
 import {
-    Transaction,
     mockTransactions,
     mockSummary,
     mockMonthlyData,
-    mockCategoryBreakdown
+    mockCategoryBreakdown,
+    FinanceSummary,
+    MonthlyData,
+    CategoryBreakdown
 } from "@/lib/mockData";
 
-export interface Filters {
+export type Transaction = {
+    id: string;
+    date: string;
+    description: string;
+    category: string;
+    amount: number;
+    type: "income" | "expense";
+};
+
+export type Filters = {
     search: string;
     category: string;
     type: "all" | "income" | "expense";
     sortBy: "date" | "amount";
     sortOrder: "asc" | "desc";
-}
+};
 
 interface FinanceState {
     transactions: Transaction[];
-    isLoading: boolean;
+    summary: FinanceSummary;
+    monthlyData: MonthlyData[];
+    categoryBreakdown: CategoryBreakdown[];
     filters: Filters;
-    summary: typeof mockSummary | null;
-    monthlyData: typeof mockMonthlyData | null;
-    categoryBreakdown: typeof mockCategoryBreakdown | null;
-
+    isLoading: boolean;
     setTransactions: (transactions: Transaction[]) => void;
+    setSummary: (summary: FinanceSummary) => void;
+    setMonthlyData: (data: MonthlyData[]) => void;
+    setCategoryBreakdown: (data: CategoryBreakdown[]) => void;
     addTransaction: (transaction: Transaction) => void;
-    editTransaction: (id: string, updatedTxn: Partial<Transaction>) => void;
-    setLoading: (isLoading: boolean) => void;
+    updateTransaction: (transaction: Transaction) => void;
+    deleteTransaction: (id: string) => void;
     setFilters: (filters: Partial<Filters>) => void;
-    resetFilters: () => void;
-    setSummary: (summary: typeof mockSummary) => void;
-    setMonthlyData: (data: typeof mockMonthlyData) => void;
-    setCategoryBreakdown: (data: typeof mockCategoryBreakdown) => void;
+    setLoading: (loading: boolean) => void;
+    hydrateFromStorage: () => void;
 }
 
-const defaultFilters: Filters = {
-    search: "",
-    category: "all",
-    type: "all",
-    sortBy: "date",
-    sortOrder: "desc",
-};
-
-const getPersistedTransactions = (): Transaction[] => {
-    if (typeof window === "undefined") return [];
-    try {
-        const saved = localStorage.getItem("user_transactions");
-        return saved ? JSON.parse(saved) : [];
-    } catch (error) {
-        console.error("Failed to parse transactions from local storage", error);
-        return [];
-    }
-};
-
-export const useFinanceStore = create<FinanceState>()((set) => ({
-    transactions: [...getPersistedTransactions(), ...mockTransactions],
+export const useFinanceStore = create<FinanceState>((set) => ({
+    transactions: mockTransactions,
+    summary: mockSummary,
+    monthlyData: mockMonthlyData,
+    categoryBreakdown: mockCategoryBreakdown,
     isLoading: false,
-    filters: defaultFilters,
-    summary: null,
-    monthlyData: null,
-    categoryBreakdown: null,
-
+    filters: {
+        search: "",
+        category: "all",
+        type: "all",
+        sortBy: "date",
+        sortOrder: "desc",
+    },
     setTransactions: (transactions) => set({ transactions }),
-
-    addTransaction: (transaction) => set((state) => {
-        const updatedTransactions = [transaction, ...state.transactions];
-        if (typeof window !== "undefined") {
-            const existingPersisted = getPersistedTransactions();
-            const newPersisted = [transaction, ...existingPersisted];
-            localStorage.setItem("user_transactions", JSON.stringify(newPersisted));
-        }
-        return { transactions: updatedTransactions };
-    }),
-
-    editTransaction: (id, updatedTxn) => set((state) => {
-        const updatedTransactions = state.transactions.map((t) =>
-            t.id === id ? { ...t, ...updatedTxn } : t
-        );
-
-        if (typeof window !== "undefined") {
-            const existingPersisted = getPersistedTransactions();
-            // If the edited transaction exists in localStorage, update it there too
-            if (existingPersisted.some((t) => t.id === id)) {
-                const newPersisted = existingPersisted.map((t) =>
-                    t.id === id ? { ...t, ...updatedTxn } : t
-                );
-                localStorage.setItem("user_transactions", JSON.stringify(newPersisted));
-            }
-        }
-        return { transactions: updatedTransactions };
-    }),
-
-    setLoading: (isLoading) => set({ isLoading }),
-    setFilters: (newFilters) => set((state) => ({ filters: { ...state.filters, ...newFilters } })),
-    resetFilters: () => set({ filters: defaultFilters }),
     setSummary: (summary) => set({ summary }),
     setMonthlyData: (monthlyData) => set({ monthlyData }),
     setCategoryBreakdown: (categoryBreakdown) => set({ categoryBreakdown }),
+    addTransaction: (transaction) => {
+        set((state) => {
+            const updated = [transaction, ...state.transactions];
+            localStorage.setItem("finance_transactions", JSON.stringify(updated.filter(t => !mockTransactions.find(m => m.id === t.id))));
+            return { transactions: updated };
+        });
+    },
+    updateTransaction: (transaction) => {
+        set((state) => {
+            const updated = state.transactions.map((t) => (t.id === transaction.id ? transaction : t));
+            localStorage.setItem("finance_transactions", JSON.stringify(updated.filter(t => !mockTransactions.find(m => m.id === t.id))));
+            return { transactions: updated };
+        });
+    },
+    deleteTransaction: (id) => {
+        set((state) => {
+            const updated = state.transactions.filter((t) => t.id !== id);
+            localStorage.setItem("finance_transactions", JSON.stringify(updated.filter(t => !mockTransactions.find(m => m.id === t.id))));
+            return { transactions: updated };
+        });
+    },
+    setFilters: (newFilters) =>
+        set((state) => ({ filters: { ...state.filters, ...newFilters } })),
+    setLoading: (isLoading) => set({ isLoading }),
+    hydrateFromStorage: () => {
+        if (typeof window === "undefined") return;
+        try {
+            const stored = localStorage.getItem("finance_transactions");
+            if (stored) {
+                const parsed = JSON.parse(stored) as Transaction[];
+                set((state) => ({
+                    transactions: [
+                        ...parsed,
+                        ...state.transactions.filter(
+                            (t) => !parsed.find((p) => p.id === t.id)
+                        ),
+                    ],
+                }));
+            }
+        } catch {
+            // localStorage corrupted
+        }
+    },
 }));

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     LineChart,
     Line,
@@ -10,57 +11,67 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useFinanceStore } from "@/store/useFinanceStore";
-import { formatCurrency } from "@/lib/utils";
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bg-popover text-popover-foreground border border-border p-3 rounded-lg shadow-md">
-                <p className="font-medium mb-1">{label}</p>
-                <p className="text-sm font-bold text-primary">
-                    Balance: {formatCurrency(payload[0].value)}
-                </p>
-            </div>
-        );
-    }
-    return null;
-};
+import { mockMonthlyData } from "@/lib/mockData";
+import type { TooltipProps } from "recharts";
+import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 
 export function BalanceTrendChart() {
-    const { monthlyData, isLoading } = useFinanceStore();
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => {
-        setIsMounted(true);
+    const transactions = useFinanceStore((s) => s.transactions);
+
+    const chartData = useMemo(() => {
+        return mockMonthlyData;
     }, []);
 
-
-    if (!isMounted || isLoading || !monthlyData) {
-        return <Skeleton className="h-[400px] w-full rounded-xl" />;
-    }
+    const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
+        const { active, payload, label } = props as any;
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-popover border border-border p-3 rounded-xl shadow-2xl text-xs">
+                    <p className="font-bold mb-1">{label}</p>
+                    <p className="text-primary font-medium">
+                        Balance: ${(payload[0].value as number).toLocaleString()}
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
-        <Card className="flex flex-col w-full overflow-hidden">
+        <Card className="bg-card/50 backdrop-blur-sm border-white/5">
             <CardHeader>
-                <CardTitle>Balance Trend (6 Months)</CardTitle>
+                <CardTitle className="text-sm font-medium">Balance Over Time</CardTitle>
             </CardHeader>
-            {/* 1. Add overflow-x-auto here */}
             <CardContent className="w-full px-2 sm:px-6 pb-6 overflow-x-auto">
-
-                {/* 2. Add this wrapper div to force a minimum width for scrolling */}
                 <div className="min-w-[500px] h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyData} margin={{ top: 10, right: 35, left: 0, bottom: 0 }}>
+                        <LineChart data={chartData} margin={{ top: 10, right: 35, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-
-                            {/* 3. Revert fontSize back to 12 */}
-                            <XAxis dataKey="month" interval={0} axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} dy={10} />
-
-                            <YAxis width={80} axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+                            <XAxis
+                                dataKey="month"
+                                interval={0}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                                dy={10}
+                            />
+                            <YAxis
+                                width={80}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                                tickFormatter={(value) => `$${value}`}
+                            />
                             <Tooltip content={<CustomTooltip />} cursor={{ stroke: "hsl(var(--border))" }} />
-                            <Line type="monotone" dataKey="balance" stroke="hsl(var(--foreground))" strokeWidth={3} dot={{ r: 4, fill: "hsl(var(--background))", strokeWidth: 2 }} activeDot={{ r: 6, fill: "hsl(var(--foreground))" }} />
+                            <Line
+                                type="monotone"
+                                dataKey="balance"
+                                stroke="hsl(var(--primary))"
+                                strokeWidth={3}
+                                dot={{ r: 4, fill: "hsl(var(--background))", strokeWidth: 2 }}
+                                activeDot={{ r: 6, fill: "hsl(var(--primary))" }}
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>

@@ -1,33 +1,28 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { SummaryCards } from "@/components/dashboard/SummaryCards";
+import { BalanceTrendChart } from "@/components/dashboard/BalanceTrendChart";
+import { SpendingBreakdownChart } from "@/components/dashboard/SpendingBreakdownChart";
 import { useFinanceStore } from "@/store/useFinanceStore";
 import {
     fetchSummary,
     fetchMonthlyData,
     fetchCategoryBreakdown
 } from "@/lib/mockGraphql";
-import { SummaryCards } from "@/components/dashboard/SummaryCards";
-import { BalanceTrendChart } from "@/components/dashboard/BalanceTrendChart";
-import { SpendingBreakdownChart } from "@/components/dashboard/SpendingBreakdownChart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
-    const {
-        setLoading,
-        setSummary,
-        setMonthlyData,
-        setCategoryBreakdown,
-        summary
-    } = useFinanceStore();
+    const setLoading = useFinanceStore((s) => s.setLoading);
+    const setSummary = useFinanceStore((s) => s.setSummary);
+    const setMonthlyData = useFinanceStore((s) => s.setMonthlyData);
+    const setCategoryBreakdown = useFinanceStore((s) => s.setCategoryBreakdown);
+    const isLoading = useFinanceStore((s) => s.isLoading);
 
     useEffect(() => {
-        // Only fetch if we haven't loaded the data yet to avoid re-fetching on tab switches
-        if (summary) return;
-
         async function loadDashboardData() {
             setLoading(true);
             try {
-                // Simulate concurrent GraphQL queries
                 const [summaryRes, monthlyRes, categoryRes] = await Promise.all([
                     fetchSummary(),
                     fetchMonthlyData(),
@@ -45,20 +40,33 @@ export default function DashboardPage() {
         }
 
         loadDashboardData();
-    }, [setLoading, setSummary, setMonthlyData, setCategoryBreakdown, summary]);
+    }, [setLoading, setSummary, setMonthlyData, setCategoryBreakdown]);
+
+    if (isLoading) {
+        return (
+            <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                    <Skeleton className="h-32 w-full rounded-xl" />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Skeleton className="h-[400px] w-full rounded-xl" />
+                    <Skeleton className="h-[400px] w-full rounded-xl" />
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="w-full relative">
-            <div className="mb-8 pt-2">
-                <h2 className="text-3xl font-bold tracking-tight mb-2">Welcome back</h2>
-                <p className="text-muted-foreground">
-                    Here is an overview of your finances for the last 6 months.
-                </p>
+        <div className="space-y-8">
+            <div>
+                <h2 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h2>
+                <p className="text-muted-foreground">Welcome back. Here's a summary of your finances.</p>
             </div>
 
             <SummaryCards />
 
-            {/* Grid for Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BalanceTrendChart />
                 <SpendingBreakdownChart />

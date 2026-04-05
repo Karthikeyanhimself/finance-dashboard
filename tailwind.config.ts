@@ -1,22 +1,15 @@
 import type { Config } from "tailwindcss";
 
-const config = {
+const config: Config = {
     darkMode: "class",
     content: [
         "./pages/**/*.{ts,tsx}",
         "./components/**/*.{ts,tsx}",
         "./app/**/*.{ts,tsx}",
         "./src/**/*.{ts,tsx}",
+        "./lib/**/*.{ts,tsx}",
     ],
-    prefix: "",
     theme: {
-        container: {
-            center: true,
-            padding: "2rem",
-            screens: {
-                "2xl": "1400px",
-            },
-        },
         extend: {
             colors: {
                 border: "hsl(var(--border))",
@@ -52,17 +45,8 @@ const config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
-                // Custom Finance Colors
-                income: {
-                    DEFAULT: "#10b981", // Emerald 500
-                    foreground: "#ffffff",
-                    muted: "rgba(16, 185, 129, 0.1)",
-                },
-                expense: {
-                    DEFAULT: "#ef4444", // Red 500
-                    foreground: "#ffffff",
-                    muted: "rgba(239, 68, 68, 0.1)",
-                },
+                income: "#10b981",
+                expense: "#ef4444",
             },
             borderRadius: {
                 lg: "var(--radius)",
@@ -71,10 +55,7 @@ const config = {
             },
         },
     },
-    plugins: [
-        require("tailwindcss-animate")
-        // Note: tw-animate-css has been removed to fix the resolution error
-    ],
-} satisfies Config;
+    plugins: [require("tailwindcss-animate")],
+};
 
 export default config;

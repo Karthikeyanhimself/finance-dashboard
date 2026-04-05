@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import { useFinanceStore } from "@/store/useFinanceStore";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -12,53 +9,61 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
-const CATEGORIES = [
-    "Food", "Transport", "Utilities", "Shopping",
-    "Entertainment", "Salary", "Freelance", "Other"
-];
+import { Search, Filter, ArrowUpDown } from "lucide-react";
+import { useFinanceStore } from "@/store/useFinanceStore";
 
 export function FilterBar() {
-    const { filters, setFilters, resetFilters } = useFinanceStore();
+    const filters = useFinanceStore((s) => s.filters);
+    const setFilters = useFinanceStore((s) => s.setFilters);
+
+    const categories = [
+        "all",
+        "food",
+        "transport",
+        "housing",
+        "entertainment",
+        "utilities",
+        "shopping",
+        "salary",
+    ];
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 bg-card p-4 rounded-xl border border-border shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none opacity-50">
-                    {/* TODO: replace with your icon file at public/icons/svg/search.svg */}
-                    <Image src="/icons/svg/search.svg" alt="Search" width={16} height={16} className="dark:invert" />
-                </div>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search descriptions..."
+                    placeholder="Search transactions..."
+                    className="pl-10 bg-card/50"
                     value={filters.search}
                     onChange={(e) => setFilters({ search: e.target.value })}
-                    className="pl-9"
                 />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-                <Select
-                    value={filters.category}
-                    onValueChange={(val) => setFilters({ category: val })}
-                >
-                    <SelectTrigger className="w-full sm:w-[140px]">
-                        <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {CATEGORIES.map((cat) => (
-                            <SelectItem key={cat} value={cat.toLowerCase()}>
-                                {cat}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+            <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Select
+                        value={filters.category}
+                        onValueChange={(val) => setFilters({ category: val })}
+                    >
+                        <SelectTrigger className="w-[140px] bg-card/50 capitalize">
+                            <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.map((cat) => (
+                                <SelectItem key={cat} value={cat} className="capitalize">
+                                    {cat}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
                 <Select
                     value={filters.type}
-                    onValueChange={(val: "all" | "income" | "expense") => setFilters({ type: val })}
+                    onValueChange={(val: any) => setFilters({ type: val })}
                 >
-                    <SelectTrigger className="w-full sm:w-[130px]">
+                    <SelectTrigger className="w-[120px] bg-card/50">
                         <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -68,9 +73,26 @@ export function FilterBar() {
                     </SelectContent>
                 </Select>
 
-                <Button variant="outline" onClick={resetFilters} className="shrink-0">
-                    Reset Filters
-                </Button>
+                <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    <Select
+                        value={`${filters.sortBy}-${filters.sortOrder}`}
+                        onValueChange={(val) => {
+                            const [sortBy, sortOrder] = val.split("-") as [any, any];
+                            setFilters({ sortBy, sortOrder });
+                        }}
+                    >
+                        <SelectTrigger className="w-[180px] bg-card/50">
+                            <SelectValue placeholder="Sort By" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="date-desc">Newest First</SelectItem>
+                            <SelectItem value="date-asc">Oldest First</SelectItem>
+                            <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                            <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
         </div>
     );

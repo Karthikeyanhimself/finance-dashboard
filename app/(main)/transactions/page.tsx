@@ -2,16 +2,25 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useFinanceStore } from "@/store/useFinanceStore";
+import { useRoleStore } from "@/store/useRoleStore";
 import { fetchTransactions } from "@/lib/mockGraphql";
 import { FilterBar } from "@/components/transactions/FilterBar";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { AddTransactionModal } from "@/components/transactions/AddTransactionModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { mockTransactions } from "@/lib/mockData";
 
 export default function TransactionsPage() {
-    const { transactions, filters, isLoading, setLoading, setTransactions } = useFinanceStore();
+    const transactions = useFinanceStore((s) => s.transactions);
+    const filters = useFinanceStore((s) => s.filters);
+    const isLoading = useFinanceStore((s) => s.isLoading);
+    const setLoading = useFinanceStore((s) => s.setLoading);
+    const setTransactions = useFinanceStore((s) => s.setTransactions);
 
-    // 1. Add the mount state to prevent hydration mismatches with localStorage
+    // Role selector for RBAC
+    const role = useRoleStore((s) => s.role);
+    const isAdmin = role === "admin";
+
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -19,7 +28,8 @@ export default function TransactionsPage() {
     }, []);
 
     useEffect(() => {
-        if (transactions.length > 0) return;
+        // Only fetch if we are looking at base mock data
+        if (transactions.length > mockTransactions.length) return;
 
         async function loadData() {
             setLoading(true);
@@ -44,7 +54,7 @@ export default function TransactionsPage() {
         }
 
         if (filters.category !== "all") {
-            result = result.filter(t => t.category.toLowerCase() === filters.category);
+            result = result.filter(t => t.category.toLowerCase() === filters.category.toLowerCase());
         }
 
         if (filters.type !== "all") {
@@ -64,7 +74,6 @@ export default function TransactionsPage() {
         return result;
     }, [transactions, filters]);
 
-    // 2. Return a skeleton while the server/client are syncing
     if (!isMounted) {
         return (
             <div className="w-full space-y-6">
@@ -87,7 +96,8 @@ export default function TransactionsPage() {
                         View and manage your recent financial activity.
                     </p>
                 </div>
-                <AddTransactionModal />
+                {/* Strictly restrict the Add button to Admin only */}
+                {isAdmin && <AddTransactionModal />}
             </div>
 
             <FilterBar />

@@ -1,37 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavigationDock } from "@/components/layout/NavigationDock";
 import { Header } from "@/components/layout/Header";
+import { useFinanceStore } from "@/store/useFinanceStore";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const pathname = usePathname();
+    const hydrateFromStorage = useFinanceStore((s) => s.hydrateFromStorage);
+
+    useEffect(() => {
+        hydrateFromStorage();
+    }, [hydrateFromStorage]);
 
     return (
-        <div className="flex min-h-screen w-full bg-background text-foreground selection:bg-emerald-500/30">
+        <div className="flex min-h-screen w-full bg-background text-foreground">
             <Header />
 
-            {/* 1. pt-20 to pt-28: Dynamically pushes content below Header.
-          2. pb-32 to pb-48: Adjusts bottom space so the Dock never overlaps content.
-          3. transition-all: Smoothly resizes if the user rotates their phone.
-      */}
-            <main className="flex-1 relative transition-all duration-300 ease-in-out pt-20 md:pt-28 pb-32 md:pb-48">
+            <main className="flex-1 relative pb-40 pt-24">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={pathname}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                        /* The 'Magic' Wrapper: 
-                           - px-4 for mobile (maximum screen usage)
-                           - md:px-10 for tablet
-                           - lg:px-16 for desktop
-                           - max-w-[1600px] ensures the dashboard doesn't look 'stretched' on Ultrawide monitors
-                        */
-                        className="w-full max-w-[1600px] mx-auto px-4 md:px-10 lg:px-16"
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl"
                     >
                         {children}
                     </motion.div>

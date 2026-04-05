@@ -1,11 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
-import { Transaction } from "@/lib/mockData";
-import { formatCurrency, formatDate, getCategoryColor, cn } from "@/lib/utils";
-import { useFinanceStore } from "@/store/useFinanceStore";
-import { useIsAdmin } from "@/store/useRoleStore";
 import {
     Table,
     TableBody,
@@ -14,79 +9,74 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { useFinanceStore, Transaction } from "@/store/useFinanceStore";
+import { useRoleStore } from "@/store/useRoleStore";
+import { cn } from "@/lib/utils";
 import { EditTransactionModal } from "./EditTransactionModal";
 
 interface TransactionTableProps {
     transactions: Transaction[];
 }
 
-const ITEMS_PER_PAGE = 10;
-
 export function TransactionTable({ transactions }: TransactionTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const { filters, setFilters } = useFinanceStore();
-    const isAdmin = useIsAdmin();
+    const itemsPerPage = 10;
 
-    const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
-    const paginatedData = transactions.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
+    const role = useRoleStore((s) => s.role);
+    const isAdmin = role === "admin";
 
-    const handleSort = (column: "date" | "amount") => {
-        if (filters.sortBy === column) {
-            setFilters({ sortOrder: filters.sortOrder === "asc" ? "desc" : "asc" });
-        } else {
-            setFilters({ sortBy: column, sortOrder: "desc" });
-        }
-        setCurrentPage(1);
+    const totalPages = Math.ceil(transactions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedData = transactions.slice(startIndex, startIndex + itemsPerPage);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+        }).format(amount);
     };
 
-    const renderSortIcon = (column: "date" | "amount") => {
-        if (filters.sortBy !== column) return null;
-        const iconName = filters.sortOrder === "asc" ? "chevron-up" : "chevron-down";
-        return (
-            <Image src={`/icons/png/${iconName}.png`} alt="Sort" width={14} height={14} className="ml-1 inline-block opacity-70" />
-        );
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
     };
 
-    if (transactions.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border border-border shadow-sm">
-                <div className="h-16 w-16 mb-4 opacity-100">
-                    <Image src="/icons/png/empty-state.png" alt="Empty" width={64} height={64} />
-                </div>
-                <p className="text-lg font-medium text-foreground">No transactions found</p>
-                <p className="text-muted-foreground text-sm mt-1">Try adjusting your filters.</p>
-            </div>
-        );
-    }
+    const getCategoryColor = (category: string) => {
+        const colors: Record<string, string> = {
+            food: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+            transport: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+            housing: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+            entertainment: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
+            utilities: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
+            shopping: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+            salary: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+        };
+        return colors[category.toLowerCase()] || "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400";
+    };
 
     return (
         <div className="space-y-4">
-            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                            <TableHead className="cursor-pointer hover:text-foreground transition-colors w-[120px]" onClick={() => handleSort("date")}>
-                                Date {renderSortIcon("date")}
-                            </TableHead>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead>Type</TableHead>
-                            <TableHead className="text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort("amount")}>
-                                Amount {renderSortIcon("amount")}
-                            </TableHead>
-                            {/* Only show the Actions column header if admin */}
-                            {isAdmin && <TableHead className="w-[50px]"></TableHead>}
+                            <TableHead className="text-right">Amount</TableHead>
+                            {isAdmin && <TableHead className="text-right">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedData.map((txn) => (
                             <TableRow key={txn.id}>
-                                {/* FIX: Added suppressHydrationWarning to handle Server vs Client timezone differences */}
                                 <TableCell className="font-medium whitespace-nowrap" suppressHydrationWarning>
                                     {formatDate(txn.date)}
                                 </TableCell>
@@ -104,7 +94,6 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                 <TableCell className={cn("text-right font-semibold", txn.type === "income" ? "text-income" : "text-foreground")}>
                                     {txn.type === "income" ? "+" : "-"}{formatCurrency(txn.amount)}
                                 </TableCell>
-                                {/* Render the Edit modal button if admin */}
                                 {isAdmin && (
                                     <TableCell className="text-right">
                                         <EditTransactionModal transaction={txn} />
@@ -116,21 +105,32 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 </Table>
             </div>
 
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2">
-                    <p className="text-sm text-muted-foreground">
-                        Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, transactions.length)} of {transactions.length} entries
-                    </p>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
-                            <Image src="/icons/png/chevron-left.png" alt="Prev" width={16} height={16} className="mr-1" /> Prev
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                            Next <Image src="/icons/png/chevron-right.png" alt="Next" width={16} height={16} className="ml-1" />
-                        </Button>
+            <div className="flex items-center justify-between px-2">
+                <p className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, transactions.length)} of {transactions.length}
+                </p>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="text-sm font-medium">
+                        Page {currentPage} of {totalPages}
                     </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
