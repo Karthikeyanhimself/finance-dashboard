@@ -22,13 +22,13 @@ export function NavigationDock() {
         {
             id: "insights",
             name: "Insights",
-            icon: "/icons/png/Insights.png",
+            icon: "/icons/png/insights.png",
             path: "/insights",
         },
         {
             id: "theme-toggle",
             name: "Toggle Theme",
-            icon: "/icons/png/Theme.png",
+            icon: "/icons/png/theme.png",
             path: "#",
             onClick: () => setTheme(theme === "dark" ? "light" : "dark")
         },
