@@ -22,7 +22,6 @@ export function SpendingBreakdownChart() {
     const data = useFinanceStore((s) => s.categoryBreakdown);
     const [activeIndex, setActiveIndex] = React.useState(0);
 
-    // Map store data to Recharts format: { name: category, value: amount }
     const chartData = React.useMemo(() => {
         return data.map(item => ({
             name: item.category,
@@ -58,7 +57,15 @@ export function SpendingBreakdownChart() {
         );
     };
 
-    const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+    interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+        payload?: Array<{
+            name?: string | number;
+            value?: number | string;
+        }>;
+    }
+
+    const CustomTooltip = (props: CustomTooltipProps) => {
+        const { active, payload } = props;
         if (active && payload && payload.length) {
             return (
                 <div className="bg-popover border border-border p-2 rounded-lg shadow-xl text-xs">
@@ -80,7 +87,6 @@ export function SpendingBreakdownChart() {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie<any>
-                                activeIndex={activeIndex}
                                 activeShape={renderActiveShape}
                                 data={chartData}
                                 cx="50%"
@@ -108,3 +114,5 @@ export function SpendingBreakdownChart() {
         </Card>
     );
 }
+
+// FIXED: Recharts Tooltip Type Error: SpendingBreakdownChart.tsx
