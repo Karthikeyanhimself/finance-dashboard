@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finance Dashboard UI
+
+> A High-Performance, macOS-Inspired Wealth Management Dashboard.
+
+Finance Dashboard UI is a financial tracking application built with **Next.js 16** and **Three.js**. It blends high-end desktop aesthetics (macOS Dock, Glassmorphism) with robust data management and interactive 3D visualizations.
+
+---
+
+## The Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router + Turbopack) |
+| Styling | Tailwind CSS (Glassmorphism & Fluid Design) |
+| 3D Engine | Three.js & @react-three/fiber |
+| Animations | Framer Motion & Lenis (Smooth Scroll) |
+| State Management | Zustand with LocalStorage Persistence |
+| Components | Shadcn UI & Lucide Icons |
+
+---
+
+## Key Features
+
+### The macOS Dock
+
+A fully functional, high-fidelity dock featuring:
+
+- **Trigonometric Magnification** — Custom $1 - \cos(\theta)$ math for smooth, wave-like icon scaling.
+- **Contextual Feedback** — Active route indicators and tooltips.
+- **Theme Integration** — A unified celestial toggle for instant Dark/Light mode switching.
+
+### Role-Based Access Control (RBAC)
+
+A built-in Admin/User toggle located in the Header that dynamically alters the UI:
+
+- **Admin Mode** — Grants access to Create and Edit transaction modals.
+- **User Mode** — Provides a read-only, distraction-free viewing experience.
+
+###  Data Visualization
+
+- **Balance Trends** — Interactive Line Charts tracking net worth.
+- **Expense Analysis** — Grouped Bar Charts comparing Income vs. Expenses.
+- **Fluid Responsiveness** — Charts utilize horizontal scrolling on mobile to maintain readability without data squishing.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/finance-os.git
+cd finance-os
+npm install
+```
+
+### 2. Add UI Components
+
+```bash
+npx shadcn@latest add switch label table dialog input select
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see your OS in action.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+.
+├── app/(main)/          # Core dashboard, transactions, and insights routes
+├── components/layout/   # NavigationDock, Header, and Sidebar logic
+├── components/visuals/  # Three.js HeroCanvas and AnimatedBackgrounds
+├── store/               # Zustand stores for Global State (Role, Finance Data, UI)
+├── lib/                 # Mock GraphQL resolvers and utility functions
+└── public/icons/        # High-resolution PNGs for the macOS Dock
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Roadmap
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [ ] **Real-time API Integration** — Swapping mock GraphQL with live database endpoints.
+- [ ] **Financial Export** — PDF and CSV generation for transaction reports.
+- [ ] **Deployment** — One-click Vercel deployment with optimized edge-caching.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Note:** This project was developed with a focus on **Hydration Safety** and **UX Performance**, ensuring a seamless transition between Server-Side Rendering (SSR) and Client-Side Interactive elements.
