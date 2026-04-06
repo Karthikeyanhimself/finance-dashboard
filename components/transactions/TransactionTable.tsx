@@ -61,9 +61,12 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     };
 
     return (
-        <div className="space-y-4 w-full">
-            {/* Scroll container to prevent mobile page enlarging */}
-            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-x-auto">
+        <div className="space-y-4 w-full max-w-full">
+            {/* Added data-lenis-prevent and touch-action to enable mobile scrolling */}
+            <div
+                className="rounded-xl border bg-card/50 backdrop-blur-sm w-full max-w-full overflow-x-auto touch-pan-x"
+                data-lenis-prevent
+            >
                 <Table className="min-w-[700px] w-full">
                     <TableHeader>
                         <TableRow>

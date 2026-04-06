@@ -33,9 +33,9 @@ function Particles() {
             </bufferGeometry>
             <pointsMaterial
                 size={0.015}
-                color="#10b981"
+                color="#8494FF"
                 transparent
-                opacity={0.4}
+                opacity={0.3}
                 sizeAttenuation
             />
         </points>
@@ -44,6 +44,7 @@ function Particles() {
 
 function BackgroundContent() {
     return (
+        /* CRITICAL: pointer-events-none and -z-10 ensures the canvas is never "touchable" */
         <div className="fixed inset-0 -z-10 pointer-events-none bg-background/50">
             <Canvas camera={{ position: [0, 0, 3] }}>
                 <ambientLight intensity={0.5} />
@@ -53,10 +54,9 @@ function BackgroundContent() {
     );
 }
 
-// Wrap with dynamic inside the client component to satisfy Next.js 16 SSR requirements
 export const AnimatedBackground = dynamic(
     () => Promise.resolve(BackgroundContent),
     { ssr: false }
 );
 
-// FIXED: Render Purity & SSR Safety: AnimatedBackground.tsx
+// FIXED: Pointer-events passthrough for background visuals
