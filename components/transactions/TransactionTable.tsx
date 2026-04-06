@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-import { useFinanceStore, Transaction } from "@/store/useFinanceStore";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Transaction } from "@/store/useFinanceStore";
 import { useRoleStore } from "@/store/useRoleStore";
 import { cn } from "@/lib/utils";
 import { EditTransactionModal } from "./EditTransactionModal";
@@ -61,9 +61,10 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden">
-                <Table>
+        <div className="space-y-4 w-full">
+            {/* Scroll container to prevent mobile page enlarging */}
+            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-x-auto">
+                <Table className="min-w-[700px] w-full">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Date</TableHead>
@@ -80,9 +81,11 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                 <TableCell className="font-medium whitespace-nowrap" suppressHydrationWarning>
                                     {formatDate(txn.date)}
                                 </TableCell>
-                                <TableCell>{txn.description}</TableCell>
+                                <TableCell className="max-w-[200px] truncate">
+                                    {txn.description}
+                                </TableCell>
                                 <TableCell>
-                                    <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", getCategoryColor(txn.category))}>
+                                    <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap", getCategoryColor(txn.category))}>
                                         {txn.category}
                                     </span>
                                 </TableCell>
@@ -91,7 +94,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                         {txn.type}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className={cn("text-right font-semibold", txn.type === "income" ? "text-income" : "text-foreground")}>
+                                <TableCell className={cn("text-right font-semibold whitespace-nowrap", txn.type === "income" ? "text-emerald-500" : "text-foreground")}>
                                     {txn.type === "income" ? "+" : "-"}{formatCurrency(txn.amount)}
                                 </TableCell>
                                 {isAdmin && (
@@ -105,7 +108,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 </Table>
             </div>
 
-            <div className="flex items-center justify-between px-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
                 <p className="text-sm text-muted-foreground">
                     Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, transactions.length)} of {transactions.length}
                 </p>
