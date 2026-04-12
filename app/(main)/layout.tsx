@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavigationDock } from "@/components/layout/NavigationDock";
 import { Header } from "@/components/layout/Header";
 import { useFinanceStore } from "@/store/useFinanceStore";
+import { Footer } from "@/components/layout/Footer";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -16,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, [hydrateFromStorage]);
 
     return (
-        <div className="relative z-0 flex min-h-screen w-full bg-background text-foreground selection:bg-emerald-500/30">
+        <div className="relative z-0 flex flex-col min-h-[100dvh] w-full bg-background text-foreground selection:bg-emerald-500/30">
             <Header />
 
             {/* CRITICAL FIX: Added `min-w-0 w-full` to prevent flex blowout */}
@@ -33,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     >
                         {children}
                     </motion.div>
+                    <Footer />
                 </AnimatePresence>
             </main>
 

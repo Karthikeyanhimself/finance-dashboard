@@ -44,13 +44,12 @@ function Particles() {
 
 function BackgroundContent() {
     return (
-        /* CRITICAL: pointer-events-none and -z-10 ensures the canvas is never "touchable" */
-        <div className="fixed inset-0 -z-10 pointer-events-none bg-background/50">
+        < div className="fixed inset-0 -z-10 pointer-events-none bg-background/50 transform-gpu translate-z-0" >
             <Canvas camera={{ position: [0, 0, 3] }}>
                 <ambientLight intensity={0.5} />
                 <Particles />
             </Canvas>
-        </div>
+        </div >
     );
 }
 
