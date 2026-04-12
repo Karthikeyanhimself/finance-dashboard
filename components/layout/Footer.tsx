@@ -23,7 +23,7 @@ export function Footer() {
                     className="font-mono text-[4rem] md:text-[8rem] font-bold leading-none tracking-tighter text-transparent will-change-transform"
                     style={{ WebkitTextStroke: "1px hsl(var(--foreground))" }}
                 >
-                    FINANCE DASHBOARD • OPEN SOURCE • FINANCE DASHBOARD • OPEN SOURCE •
+                    FINANCE DASHBOARD • TEMPLATE • FINANCE DASHBOARD • TEMPLATE •
                 </motion.div>
             </div>
 
